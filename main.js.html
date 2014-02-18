@@ -66,6 +66,12 @@
             <li class="active"><a href="main.js.html">main.js</a></li>
             <li class=""><a href="modules/cn-search/retrieve.js.html">modules/cn-search/retrieve.js</a></li>
             <li class=""><a href="modules/cn-search/save.js.html">modules/cn-search/save.js</a></li>
+            <li class=""><a href="modules/cn-store/allowed-tags.js.html">modules/cn-store/allowed-tags.js</a></li>
+            <li class=""><a href="modules/cn-store/index.js.html">modules/cn-store/index.js</a></li>
+            <li class=""><a href="modules/cn-store/item.js.html">modules/cn-store/item.js</a></li>
+            <li class=""><a href="modules/cn-store/language-codes.js.html">modules/cn-store/language-codes.js</a></li>
+            <li class=""><a href="modules/cn-store/map.js.html">modules/cn-store/map.js</a></li>
+            <li class=""><a href="modules/cn-store/region.js.html">modules/cn-store/region.js</a></li>
             <li class=""><a href="modules/cn-store/source.js.html">modules/cn-store/source.js</a></li>
             <li class=""><a href="modules/cn-store/user.js.html">modules/cn-store/user.js</a></li>
             <li class=""><a href="modules/suckas/sucka.js.html">modules/suckas/sucka.js</a></li>
@@ -111,6 +117,9 @@
 App.prototype.start = function() {
   var that = this;
 
+  this.transformQueue = redis.createClient();
+  this.suckaQueue = kue.createQueue();
+
   this.processErrorHandling();
 
   // Setup the shared message bus used by all sucka instances
@@ -122,7 +131,7 @@ App.prototype.start = function() {
   });
 
   // Check for delayed jobs that need to be promoted. This runs every 5 seconds
-  queue.promote();
+  this.suckaQueue.promote();
 
 };</code></pre>
           <section id="processErrorHandling">
@@ -303,11 +312,14 @@ App.prototype.start = function() {
     if(source.frequency === &quot;repeats&quot;) {
       // Perform a suck whenever this source has an active task in the queue. 
       // We use the source.id (string) as the task `type`/event name. 
-      queue.process(source.id, function(task, done) {
+      this.suckaQueue.process(source.id, function(task, done) {
         that.suckIt(task.data.source, done);
       });
     }
 
+    // Some sources will be sucked only once, once per processes, or need 
+    // to be sucked for the first time, even if they'll repeat. Find 'em and
+    // suck 'em.
     that.shouldSuck(source).then(function(shouldSuck) {
       if(shouldSuck) that.suckIt(source)
     });
@@ -423,8 +435,11 @@ App.prototype.start = function() {
   // update source lastRun with current timestamp
   // determine if we should schedule another suck for this source
   console.log(&quot;post suck &quot;+source);
+
+  this.transformQueue.publish(&quot;transform&quot;, JSON.stringify({id:source.id}));
+
   if(source.frequency === &quot;repeats&quot;) {
-    queue.create(source.id, {source:source}).delay(1000).save();
+    this.suckaQueue.create(source.id, {source:source}).delay(1000).save();
   }
 
   
@@ -445,7 +460,7 @@ App.prototype.start = function() {
       hasRun: false,
       sourceType: &quot;twitter&quot;,
       id: &quot;abcdef123&quot;,
-      searchTerms: [&quot;#CARcrisis&quot;]
+      searchTerms: [&quot;#ValentinesDay&quot;]
     }];
 
   return new Promise(function (resolve, reject) {
@@ -453,7 +468,9 @@ App.prototype.start = function() {
   });
 };
 
-(new App()).start();</code></pre>
+if(require.main === module) (new App()).start()
+
+module.exports = App;</code></pre>
         </div>
       </div>
     </div>

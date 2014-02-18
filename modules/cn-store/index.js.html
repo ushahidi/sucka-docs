@@ -65,9 +65,9 @@
             <li class=""><a href="../../index.html">Main</a></li>
             <li class=""><a href="../../main.js.html">main.js</a></li>
             <li class=""><a href="../../modules/cn-search/retrieve.js.html">modules/cn-search/retrieve.js</a></li>
-            <li class="active"><a href="../../modules/cn-search/save.js.html">modules/cn-search/save.js</a></li>
+            <li class=""><a href="../../modules/cn-search/save.js.html">modules/cn-search/save.js</a></li>
             <li class=""><a href="../../modules/cn-store/allowed-tags.js.html">modules/cn-store/allowed-tags.js</a></li>
-            <li class=""><a href="../../modules/cn-store/index.js.html">modules/cn-store/index.js</a></li>
+            <li class="active"><a href="../../modules/cn-store/index.js.html">modules/cn-store/index.js</a></li>
             <li class=""><a href="../../modules/cn-store/item.js.html">modules/cn-store/item.js</a></li>
             <li class=""><a href="../../modules/cn-store/language-codes.js.html">modules/cn-store/language-codes.js</a></li>
             <li class=""><a href="../../modules/cn-store/map.js.html">modules/cn-store/map.js</a></li>
@@ -79,32 +79,34 @@
           </ul>
           <div class="scrollspy">
             <ul class="nav nav-list bs-docs-sidenav affix-top">
-              <li><a href="#validateStructure"><i class="alert alert-info"></i>validateStructure</a>
+              <li><a href="#Item"><i class="alert alert-success"></i>Item</a>
               </li>
             </ul>
           </div>
         </div>
         <div class="span9">
-          <section id="validateStructure">
-            <h1>validateStructure</h1>
+          <section id="Item">
+            <h1>Item</h1>
             <h5 class="subheader"></h5>
             <p>
-              <div class="label label-info radius ctx-type">function</div><span>validateStructure()</span>
+              <div class="label label-success radius ctx-type">declaration</div><span>Item</span>
             </p>
           </section>
-          <div class="description"><p>@todo Methods for index documents into the search datastore</p> </div>
-          <pre><code class="language-javascript">var validateStructure = function(data) {
-  return true;
-};
+          <div class="description"> </div>
+          <pre><code class="language-javascript">var Item = require('./item')
+  , Map = require('./map')
+  , Region = require('./region')
+  , Source = require('./source')
+  , User = require('./user');
 
-var indexData = function(source) { 
-  return function(data) {
-    if(!validateStructure(data)) return sourceBroken(source);
 
-    // index data
-    // if this is a polling event, then reschedule
-  }
-};</code></pre>
+module.exports = {
+  Item: Item,
+  Map: Map,
+  Region: Region,
+  Source: Source,
+  User: User
+}</code></pre>
         </div>
       </div>
     </div>

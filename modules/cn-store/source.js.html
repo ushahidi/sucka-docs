@@ -66,6 +66,12 @@
             <li class=""><a href="../../main.js.html">main.js</a></li>
             <li class=""><a href="../../modules/cn-search/retrieve.js.html">modules/cn-search/retrieve.js</a></li>
             <li class=""><a href="../../modules/cn-search/save.js.html">modules/cn-search/save.js</a></li>
+            <li class=""><a href="../../modules/cn-store/allowed-tags.js.html">modules/cn-store/allowed-tags.js</a></li>
+            <li class=""><a href="../../modules/cn-store/index.js.html">modules/cn-store/index.js</a></li>
+            <li class=""><a href="../../modules/cn-store/item.js.html">modules/cn-store/item.js</a></li>
+            <li class=""><a href="../../modules/cn-store/language-codes.js.html">modules/cn-store/language-codes.js</a></li>
+            <li class=""><a href="../../modules/cn-store/map.js.html">modules/cn-store/map.js</a></li>
+            <li class=""><a href="../../modules/cn-store/region.js.html">modules/cn-store/region.js</a></li>
             <li class="active"><a href="../../modules/cn-store/source.js.html">modules/cn-store/source.js</a></li>
             <li class=""><a href="../../modules/cn-store/user.js.html">modules/cn-store/user.js</a></li>
             <li class=""><a href="../../modules/suckas/sucka.js.html">modules/suckas/sucka.js</a></li>
@@ -73,22 +79,73 @@
           </ul>
           <div class="scrollspy">
             <ul class="nav nav-list bs-docs-sidenav affix-top">
+              <li><a href="#sourceSchema"><i class="alert alert-success"></i>sourceSchema</a>
+              </li>
             </ul>
           </div>
         </div>
         <div class="span9">
-          <div class="description"><p>@todo Definition of source object - notes below</p> </div>
-          <pre><code class="language-javascript">sourceType: twitter, facebook, randomAgency
-frequency: once, streaming
-repeatsEvery: second, minute, hour, day, month 
-hasRun: 
-startDate: 
-endDate: 
-name: 
-description: 
-createdBy: 
-status: ok, failing
-lastRun:</code></pre>
+          <section id="sourceSchema">
+            <h1>sourceSchema</h1>
+            <h5 class="subheader"></h5>
+            <p>
+              <div class="label label-success radius ctx-type">declaration</div><span>sourceSchema</span>
+            </p>
+          </section>
+          <div class="description"><p>A Source document represents a source of data.</p> </div>
+          <pre><code class="language-javascript">var sourceSchema = mongoose.Schema({
+    createdAt: {
+      type: Date,
+      default: Date.now
+    },
+    updatedAt: Date,</code></pre>
+          <div class="description"><p><code>sourceType</code> lets the application know how the incoming data will be <br />retrieved and structured. Often times there will only be one source <br />for a given source type - for example a one-off dataset kept in a <br />spreadsheet. However with services like Twitter, that provide data <br />on an ongoing basis, there may be many sources, each retrieving data <br />in a specific way - for example tweets with a particular hashtag, or <br />within a given geospatial boundry.</p> </div>
+          <pre><code class="language-javascript">sourceType: {
+      type: String,
+      required: true,
+      index: true
+    },</code></pre>
+          <div class="description"><p>Most sources will repeat, because they poll an endpoint periodically for <br />new or updated data. However it is also possible to have sources that <br />are "always" retrieved (streaming services like Twitter and Facebook), <br />and sources that need to be retrieved only once.</p> </div>
+          <pre><code class="language-javascript">frequency: {
+      type: String,
+      required: true,
+      validate: validate('isIn', ['once', 'always', 'repeats'])
+    },
+    repeatsEvery: {
+      type: String,
+      required: false,
+      validate: validate('isIn', ['minute', 'hour', 'day', 'week'])
+    },
+    hasRun: Boolean,
+    startDate: {
+      type: Date,
+      required: true
+    },
+    endDate: {
+      type: Date,
+      required: true
+    },
+    description: String,
+    status: {
+      type: String,
+      required: true,
+      default: 'active',
+      index: true,
+      validate: validate('isIn', ['active', 'failing', 'inactive'])
+    },
+    lastRun: Date
+    //createdBy: User
+});
+
+sourceSchema.pre(&quot;save&quot;,function(next, done) {
+    var self = this;
+    self.updatedAt = Date.now();
+    next();
+});
+
+var Source = mongoose.model('Source', sourceSchema);
+
+module.exports = Source;</code></pre>
         </div>
       </div>
     </div>
